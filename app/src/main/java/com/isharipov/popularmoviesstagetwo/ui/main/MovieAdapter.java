@@ -20,17 +20,19 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieViewHolder> {
 
     private final Context context;
     private final List<Movie> movies;
+    private final MovieViewClickListener clickListener;
 
-    public MovieAdapter(Context context, List<Movie> movies) {
+    public MovieAdapter(Context context, List<Movie> movies, MovieViewClickListener clickListener) {
         this.context = context;
         this.movies = movies;
+        this.clickListener = clickListener;
     }
 
     @NonNull
     @Override
     public MovieViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View layoutView = LayoutInflater.from(parent.getContext()).inflate(R.layout.movie_list_item, null);
-        return new MovieViewHolder(layoutView);
+        View layoutView = LayoutInflater.from(parent.getContext()).inflate(R.layout.movie_list_item, parent, false);
+        return new MovieViewHolder(layoutView, clickListener);
     }
 
     @Override

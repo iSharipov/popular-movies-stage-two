@@ -9,19 +9,15 @@ import com.isharipov.popularmoviesstagetwo.R;
 /**
  * 01.05.2018.
  */
-public class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+public class MovieViewHolder extends RecyclerView.ViewHolder {
 
-    private ImageView gridItemImage;
+    private final ImageView gridItemImage;
 
-    MovieViewHolder(View itemView) {
+    MovieViewHolder(View itemView, MovieViewClickListener clickListener) {
         super(itemView);
-        itemView.setOnClickListener(this);
         gridItemImage = itemView.findViewById(R.id.grid_item_image);
-    }
 
-    @Override
-    public void onClick(View v) {
-
+        itemView.setOnClickListener(v -> clickListener.onClick(itemView, getAdapterPosition()));
     }
 
     public ImageView getGridItemImage() {

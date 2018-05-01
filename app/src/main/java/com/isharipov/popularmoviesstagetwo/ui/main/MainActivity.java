@@ -23,6 +23,7 @@ import com.isharipov.popularmoviesstagetwo.BuildConfig;
 import com.isharipov.popularmoviesstagetwo.R;
 import com.isharipov.popularmoviesstagetwo.data.network.MovieResult;
 import com.isharipov.popularmoviesstagetwo.data.network.TheMovieDbRestClient;
+import com.isharipov.popularmoviesstagetwo.ui.detail.DetailActivity;
 import com.isharipov.popularmoviesstagetwo.ui.pref.SettingsPrefActivity;
 
 import butterknife.BindView;
@@ -82,7 +83,8 @@ public class MainActivity extends AppCompatActivity {
                     if (response.isSuccessful()) {
                         MovieResult result = response.body();
                         if (result != null && result.getResults() != null) {
-                            gridView.setAdapter(new MovieAdapter(MainActivity.this, result.getResults()));
+                            gridView.setAdapter(new MovieAdapter(MainActivity.this, result.getResults(), new MovieClickListener()));
+                            movieResult = result;
                         }
                     }
                 }
@@ -95,6 +97,13 @@ public class MainActivity extends AppCompatActivity {
             });
         } else {
             addButton();
+        }
+    }
+
+    class MovieClickListener implements MovieViewClickListener {
+        @Override
+        public void onClick(View view, int position) {
+            DetailActivity.start(MainActivity.this, String.valueOf(movieResult.getResults().get(position).getId()));
         }
     }
 
