@@ -37,7 +37,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieViewHolder> {
     public void onBindViewHolder(@NonNull MovieViewHolder holder, int position) {
         String theMovieDbImgUrl = context.getString(R.string.themoviedb_img_url);
         Picasso.with(context)
-                .load(theMovieDbImgUrl + "w185" + movies.get(position).getPosterPath())
+                .load(theMovieDbImgUrl + "w342" + movies.get(position).getPosterPath())
                 .into(holder.getGridItemImage());
     }
 

@@ -4,12 +4,16 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -19,6 +23,7 @@ import com.isharipov.popularmoviesstagetwo.BuildConfig;
 import com.isharipov.popularmoviesstagetwo.R;
 import com.isharipov.popularmoviesstagetwo.data.network.MovieResult;
 import com.isharipov.popularmoviesstagetwo.data.network.TheMovieDbRestClient;
+import com.isharipov.popularmoviesstagetwo.ui.pref.SettingsPrefActivity;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -49,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         networkReceiver = new NetworkReceiver();
+        initPreferences();
         this.registerReceiver(networkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         gridView.setLayoutManager(new GridLayoutManager(this, 2));
     }
@@ -120,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         updateConnectedFlags();
         if (refreshDisplay) {
-            makeMovieDbSearchQuery("popular");
+            makeMovieDbSearchQuery(sortType);
         } else {
             addButton();
         }
@@ -133,5 +139,26 @@ public class MainActivity extends AppCompatActivity {
             this.unregisterReceiver(networkReceiver);
         }
         gridView.setAdapter(null);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            startActivity(new Intent(MainActivity.this, SettingsPrefActivity.class));
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void initPreferences() {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        sortType = sharedPref.getString(SettingsPrefActivity.KEY_PREF_MOVIE_SORT_TYPE, getString(R.string.pref_sort_type_default));
     }
 }

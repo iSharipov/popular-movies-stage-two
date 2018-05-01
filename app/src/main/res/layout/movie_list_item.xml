@@ -3,6 +3,6 @@
     android:id="@+id/grid_item_image"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:scaleType="fitStart"
     android:adjustViewBounds="true"
-    android:contentDescription="@null" />
+    android:contentDescription="@null"
+    android:scaleType="fitStart" />
