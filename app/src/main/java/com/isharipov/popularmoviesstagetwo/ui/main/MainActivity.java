@@ -1,4 +1,4 @@
-package com.isharipov.popularmoviesstagetwo;
+package com.isharipov.popularmoviesstagetwo.ui.main;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -8,11 +8,15 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.isharipov.popularmoviesstagetwo.BuildConfig;
+import com.isharipov.popularmoviesstagetwo.R;
 import com.isharipov.popularmoviesstagetwo.data.network.MovieResult;
 import com.isharipov.popularmoviesstagetwo.data.network.TheMovieDbRestClient;
 
@@ -29,8 +33,13 @@ public class MainActivity extends AppCompatActivity {
     public static boolean refreshDisplay = true;
 
     @BindView(R.id.pb_loading_indicator)
-    protected ProgressBar progressBar;
+    ProgressBar progressBar;
+    @BindView(R.id.offline_button)
+    Button offlineButton;
+    @BindView(R.id.gridView)
+    RecyclerView gridView;
     private String sortType;
+    private MovieResult movieResult;
 
     private NetworkReceiver networkReceiver = new NetworkReceiver();
 
@@ -41,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         networkReceiver = new NetworkReceiver();
         this.registerReceiver(networkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+        gridView.setLayoutManager(new GridLayoutManager(this, 2));
     }
 
     public void updateConnectedFlags() {
@@ -57,20 +67,24 @@ public class MainActivity extends AppCompatActivity {
 
     private void makeMovieDbSearchQuery(String sortType) {
         if (wifiConnected || mobileConnected) {
-            findViewById(R.id.offline_button).setVisibility(View.INVISIBLE);
+            offlineButton.setVisibility(View.INVISIBLE);
             progressBar.setVisibility(View.VISIBLE);
             TheMovieDbRestClient.getInstance().moviesAsync(sortType, BuildConfig.THEMOVIE_DB_API_KEY, new Callback<MovieResult>() {
                 @Override
                 public void onResponse(Call<MovieResult> call, Response<MovieResult> response) {
                     progressBar.setVisibility(View.INVISIBLE);
-                    if (response != null) {
-                        System.out.println(response);
+                    if (response.isSuccessful()) {
+                        MovieResult result = response.body();
+                        if (result != null && result.getResults() != null) {
+                            gridView.setAdapter(new MovieAdapter(MainActivity.this, result.getResults()));
+                        }
                     }
                 }
 
                 @Override
                 public void onFailure(Call<MovieResult> call, Throwable t) {
                     progressBar.setVisibility(View.INVISIBLE);
+                    addButton();
                 }
             });
         } else {
@@ -79,7 +93,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void addButton() {
-        Button offlineButton = findViewById(R.id.offline_button);
         offlineButton.setVisibility(View.VISIBLE);
         offlineButton.setOnClickListener(v -> {
             updateConnectedFlags();
@@ -103,8 +116,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
+    protected void onResume() {
+        super.onResume();
         updateConnectedFlags();
         if (refreshDisplay) {
             makeMovieDbSearchQuery("popular");
@@ -114,10 +127,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onPause() {
+        super.onPause();
         if (networkReceiver != null) {
             this.unregisterReceiver(networkReceiver);
         }
+        gridView.setAdapter(null);
     }
 }
