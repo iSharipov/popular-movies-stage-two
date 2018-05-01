@@ -64,7 +64,7 @@ public class TheMovieDbRestClient {
     }
 
     /**
-     * Get suggestion asynchronously.
+     * Get movies asynchronously.
      *
      * @param callback a Retrofit callback.
      */
@@ -74,12 +74,52 @@ public class TheMovieDbRestClient {
     }
 
     /**
-     * Get suggestion synchronously.
+     * Get movies synchronously.
      *
      * @return
      */
     public MovieResult moviesSync(String sortType, String apiKey) throws IOException {
         Call<MovieResult> moviesSync = apiService.getMoviesBySortType(sortType, apiKey);
+        return moviesSync.execute().body();
+    }
+
+    /**
+     * Get movie trailers asynchronously.
+     *
+     * @param callback a Retrofit callback.
+     */
+    public void movieTrailersAsync(String id, String apiKey, Callback<TrailerResult> callback) {
+        Call<TrailerResult> movieTrailersSync = apiService.getMovieTrailers(id, apiKey);
+        movieTrailersSync.enqueue(callback);
+    }
+
+    /**
+     * Get movie reviews asynchronously.
+     *
+     * @param callback a Retrofit callback.
+     */
+    public void movieReviewsAsync(String id, String apiKey, Callback<ReviewResult> callback) {
+        Call<ReviewResult> movieReviewsSync = apiService.getMovieReviews(id, apiKey);
+        movieReviewsSync.enqueue(callback);
+    }
+
+    /**
+     * Get movie trailers
+     *
+     * @return
+     */
+    public TrailerResult movieTrailersSync(String id, String apiKey) throws IOException {
+        Call<TrailerResult> moviesSync = apiService.getMovieTrailers(id, apiKey);
+        return moviesSync.execute().body();
+    }
+
+    /**
+     * Get movie reviews synchronously.
+     *
+     * @return
+     */
+    public ReviewResult movieReviewsSync(String id, String apiKey) throws IOException {
+        Call<ReviewResult> moviesSync = apiService.getMovieReviews(id, apiKey);
         return moviesSync.execute().body();
     }
 }

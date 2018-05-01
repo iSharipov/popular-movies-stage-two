@@ -47,16 +47,14 @@ public class MainActivity extends AppCompatActivity {
     private String sortType;
     private MovieResult movieResult;
 
-    private NetworkReceiver networkReceiver = new NetworkReceiver();
+    private NetworkReceiver networkReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-        networkReceiver = new NetworkReceiver();
         initPreferences();
-        this.registerReceiver(networkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         gridView.setLayoutManager(new GridLayoutManager(this, 2));
     }
 
@@ -134,6 +132,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         updateConnectedFlags();
+        networkReceiver = new NetworkReceiver();
+        this.registerReceiver(networkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         if (refreshDisplay) {
             makeMovieDbSearchQuery(sortType);
         } else {
