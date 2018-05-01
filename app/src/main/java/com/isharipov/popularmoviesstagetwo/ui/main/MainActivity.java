@@ -9,6 +9,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -76,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
             progressBar.setVisibility(View.VISIBLE);
             TheMovieDbRestClient.getInstance().moviesAsync(sortType, BuildConfig.THEMOVIE_DB_API_KEY, new Callback<MovieResult>() {
                 @Override
-                public void onResponse(Call<MovieResult> call, Response<MovieResult> response) {
+                public void onResponse(@NonNull Call<MovieResult> call, @NonNull Response<MovieResult> response) {
                     progressBar.setVisibility(View.INVISIBLE);
                     if (response.isSuccessful()) {
                         MovieResult result = response.body();
@@ -88,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void onFailure(Call<MovieResult> call, Throwable t) {
+                public void onFailure(@NonNull Call<MovieResult> call, @NonNull Throwable t) {
                     progressBar.setVisibility(View.INVISIBLE);
                     addButton();
                 }

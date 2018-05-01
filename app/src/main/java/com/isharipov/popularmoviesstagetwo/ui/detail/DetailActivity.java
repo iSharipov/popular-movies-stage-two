@@ -3,6 +3,7 @@ package com.isharipov.popularmoviesstagetwo.ui.detail;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
@@ -34,24 +35,24 @@ public class DetailActivity extends AppCompatActivity {
         String id = (String) getIntent().getSerializableExtra(EXTRA_INFO);
         TheMovieDbRestClient.getInstance().movieTrailersAsync(id, BuildConfig.THEMOVIE_DB_API_KEY, new Callback<TrailerResult>() {
             @Override
-            public void onResponse(Call<TrailerResult> call, Response<TrailerResult> response) {
+            public void onResponse(@NonNull Call<TrailerResult> call, @NonNull Response<TrailerResult> response) {
 
             }
 
             @Override
-            public void onFailure(Call<TrailerResult> call, Throwable t) {
+            public void onFailure(@NonNull Call<TrailerResult> call, @NonNull Throwable t) {
 
             }
         });
 
         TheMovieDbRestClient.getInstance().movieReviewsAsync(id, BuildConfig.THEMOVIE_DB_API_KEY, new Callback<ReviewResult>() {
             @Override
-            public void onResponse(Call<ReviewResult> call, Response<ReviewResult> response) {
+            public void onResponse(@NonNull Call<ReviewResult> call, @NonNull Response<ReviewResult> response) {
 
             }
 
             @Override
-            public void onFailure(Call<ReviewResult> call, Throwable t) {
+            public void onFailure(@NonNull Call<ReviewResult> call, @NonNull Throwable t) {
 
             }
         });
