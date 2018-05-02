@@ -17,6 +17,7 @@
     <string name="release_date">Release Date:</string>
     <string name="movie_empty_label">Movie</string>
     <string name="trailers">Trailers:</string>
+    <string name="reviews">Reviews:</string>
 
     <string-array name="entries">
         <item>Popular</item>
