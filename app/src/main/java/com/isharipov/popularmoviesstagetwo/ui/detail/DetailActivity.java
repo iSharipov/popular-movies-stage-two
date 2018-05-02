@@ -6,6 +6,10 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -30,6 +34,7 @@ import retrofit2.Response;
 public class DetailActivity extends AppCompatActivity {
 
     private static final String EXTRA_INFO = "extra_info";
+    private Movie movie;
 
     @BindView(R.id.movie_title)
     TextView movieTitle;
@@ -43,6 +48,8 @@ public class DetailActivity extends AppCompatActivity {
     RatingBar ratingBar;
     @BindView(R.id.favorite_button)
     ImageView favoriteButton;
+    @BindView(R.id.trailerView)
+    RecyclerView trailerView;
 
     public static void start(Activity activity, Movie movie) {
         Intent intent = new Intent(activity, DetailActivity.class);
@@ -55,19 +62,9 @@ public class DetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
         ButterKnife.bind(this);
-        Movie movie = (Movie) getIntent().getSerializableExtra(EXTRA_INFO);
+        initTrailerView();
+        movie = (Movie) getIntent().getSerializableExtra(EXTRA_INFO);
         populateUI(movie);
-        TheMovieDbRestClient.getInstance().movieTrailersAsync(String.valueOf(movie.getId()), BuildConfig.THEMOVIE_DB_API_KEY, new Callback<TrailerResult>() {
-            @Override
-            public void onResponse(@NonNull Call<TrailerResult> call, @NonNull Response<TrailerResult> response) {
-
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<TrailerResult> call, @NonNull Throwable t) {
-
-            }
-        });
 
         TheMovieDbRestClient.getInstance().movieReviewsAsync(String.valueOf(movie.getId()), BuildConfig.THEMOVIE_DB_API_KEY, new Callback<ReviewResult>() {
             @Override
@@ -82,6 +79,16 @@ public class DetailActivity extends AppCompatActivity {
         });
     }
 
+    private void initTrailerView() {
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        trailerView.setLayoutManager(linearLayoutManager);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(
+                trailerView.getContext(),
+                linearLayoutManager.getOrientation()
+        );
+        trailerView.addItemDecoration(dividerItemDecoration);
+    }
+
     private void populateUI(Movie movie) {
         String theMovieDbImgUrl = getString(R.string.themoviedb_img_url);
         Picasso.with(this)
@@ -91,5 +98,31 @@ public class DetailActivity extends AppCompatActivity {
         releaseDate.setText(movie.getReleaseDate());
         ratingBar.setRating(movie.getVoteAverage().floatValue());
         movieOverview.setText(movie.getOverview());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        TheMovieDbRestClient.getInstance().movieTrailersAsync(String.valueOf(movie.getId()), BuildConfig.THEMOVIE_DB_API_KEY, new Callback<TrailerResult>() {
+            @Override
+            public void onResponse(@NonNull Call<TrailerResult> call, @NonNull Response<TrailerResult> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    trailerView.setAdapter(new TrailerAdapter(response.body().getResults(), new TrailerClickListener()));
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<TrailerResult> call, @NonNull Throwable t) {
+
+            }
+        });
+    }
+
+    class TrailerClickListener implements TrailerViewClickListener {
+
+        @Override
+        public void onClick(View view, int position) {
+
+        }
     }
 }
