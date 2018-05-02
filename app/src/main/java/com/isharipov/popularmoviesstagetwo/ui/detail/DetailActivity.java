@@ -1,7 +1,10 @@
 package com.isharipov.popularmoviesstagetwo.ui.detail;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -19,8 +22,12 @@ import com.isharipov.popularmoviesstagetwo.R;
 import com.isharipov.popularmoviesstagetwo.data.network.Movie;
 import com.isharipov.popularmoviesstagetwo.data.network.ReviewResult;
 import com.isharipov.popularmoviesstagetwo.data.network.TheMovieDbRestClient;
+import com.isharipov.popularmoviesstagetwo.data.network.Trailer;
 import com.isharipov.popularmoviesstagetwo.data.network.TrailerResult;
 import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -35,6 +42,7 @@ public class DetailActivity extends AppCompatActivity {
 
     private static final String EXTRA_INFO = "extra_info";
     private Movie movie;
+    private List<Trailer> trailers;
 
     @BindView(R.id.movie_title)
     TextView movieTitle;
@@ -107,7 +115,11 @@ public class DetailActivity extends AppCompatActivity {
             @Override
             public void onResponse(@NonNull Call<TrailerResult> call, @NonNull Response<TrailerResult> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    trailerView.setAdapter(new TrailerAdapter(response.body().getResults(), new TrailerClickListener()));
+                    TrailerResult result = response.body();
+                    if (result.getResults() != null) {
+                        trailers = new ArrayList<>(result.getResults());
+                        trailerView.setAdapter(new TrailerAdapter(trailers, new TrailerClickListener()));
+                    }
                 }
             }
 
@@ -122,7 +134,18 @@ public class DetailActivity extends AppCompatActivity {
 
         @Override
         public void onClick(View view, int position) {
+            watchYoutubeVideo(DetailActivity.this, trailers.get(position).getKey());
+        }
+    }
 
+    private void watchYoutubeVideo(Context context, String key) {
+        Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + key));
+        Intent webIntent = new Intent(Intent.ACTION_VIEW,
+                Uri.parse("http://www.youtube.com/watch?v=" + key));
+        try {
+            context.startActivity(appIntent);
+        } catch (ActivityNotFoundException ex) {
+            context.startActivity(webIntent);
         }
     }
 }
