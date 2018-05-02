@@ -102,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
     class MovieClickListener implements MovieViewClickListener {
         @Override
         public void onClick(View view, int position) {
-            DetailActivity.start(MainActivity.this, String.valueOf(movieResult.getResults().get(position).getId()));
+            DetailActivity.start(MainActivity.this, movieResult.getResults().get(position));
         }
     }
 
