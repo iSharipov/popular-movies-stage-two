@@ -17,8 +17,9 @@ import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
-import com.isharipov.popularmoviesstagetwo.BuildConfig;
 import com.isharipov.popularmoviesstagetwo.R;
+import com.isharipov.popularmoviesstagetwo.data.db.Favorite;
+import com.isharipov.popularmoviesstagetwo.data.db.FavoriteDataSource;
 import com.isharipov.popularmoviesstagetwo.data.network.Movie;
 import com.isharipov.popularmoviesstagetwo.data.network.Review;
 import com.isharipov.popularmoviesstagetwo.data.network.ReviewResult;
@@ -45,6 +46,7 @@ public class DetailActivity extends AppCompatActivity {
     private Movie movie;
     private List<Trailer> trailers;
     private List<Review> reviews;
+    private FavoriteDataSource dataSource;
 
     @BindView(R.id.movie_title)
     TextView movieTitle;
@@ -78,6 +80,11 @@ public class DetailActivity extends AppCompatActivity {
         initReviewView();
         movie = (Movie) getIntent().getSerializableExtra(EXTRA_INFO);
         populateUI(movie);
+    }
+
+    private void initDataSource() {
+        dataSource = new FavoriteDataSource(this);
+        dataSource.open();
     }
 
     private void initTrailerView() {
@@ -114,7 +121,7 @@ public class DetailActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        TheMovieDbRestClient.getInstance().movieTrailersAsync(String.valueOf(movie.getId()), BuildConfig.THEMOVIE_DB_API_KEY, new Callback<TrailerResult>() {
+        TheMovieDbRestClient.getInstance().movieTrailersAsync(String.valueOf(movie.getId()), new Callback<TrailerResult>() {
             @Override
             public void onResponse(@NonNull Call<TrailerResult> call, @NonNull Response<TrailerResult> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -131,7 +138,7 @@ public class DetailActivity extends AppCompatActivity {
 
             }
         });
-        TheMovieDbRestClient.getInstance().movieReviewsAsync(String.valueOf(movie.getId()), BuildConfig.THEMOVIE_DB_API_KEY, new Callback<ReviewResult>() {
+        TheMovieDbRestClient.getInstance().movieReviewsAsync(String.valueOf(movie.getId()), new Callback<ReviewResult>() {
             @Override
             public void onResponse(@NonNull Call<ReviewResult> call, @NonNull Response<ReviewResult> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -148,6 +155,37 @@ public class DetailActivity extends AppCompatActivity {
 
             }
         });
+        initDataSource();
+        initFavoriteButton();
+        favoriteButton.setOnClickListener(v -> {
+            changeFavoriteButton();
+        });
+    }
+
+    private void initFavoriteButton() {
+        Favorite favorite = dataSource.getFavorite(movie.getId());
+        if (favorite != null) {
+            favoriteButton.setImageResource(R.drawable.ic_bookmark_red_24dp);
+        } else {
+            favoriteButton.setImageResource(R.drawable.ic_bookmark_border_gray_24dp);
+        }
+    }
+
+    private void changeFavoriteButton() {
+        Favorite favorite = dataSource.getFavorite(movie.getId());
+        if (favorite != null) {
+            dataSource.deleteFavourite(favorite);
+            favoriteButton.setImageResource(R.drawable.ic_bookmark_border_gray_24dp);
+        } else {
+            dataSource.createFavorite(movie.getId());
+            favoriteButton.setImageResource(R.drawable.ic_bookmark_red_24dp);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        dataSource.close();
     }
 
     class TrailerClickListener implements TrailerViewClickListener {

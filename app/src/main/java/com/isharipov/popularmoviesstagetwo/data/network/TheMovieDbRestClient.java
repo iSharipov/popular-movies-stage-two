@@ -1,6 +1,7 @@
 package com.isharipov.popularmoviesstagetwo.data.network;
 
 import com.google.gson.Gson;
+import com.isharipov.popularmoviesstagetwo.BuildConfig;
 
 import java.io.IOException;
 
@@ -18,6 +19,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class TheMovieDbRestClient {
     private static final String BASE_URL = "http://api.themoviedb.org/";
+    private static final String API_KEY = BuildConfig.THEMOVIE_DB_API_KEY;
 
     private static volatile TheMovieDbRestClient instance;
 
@@ -68,8 +70,8 @@ public class TheMovieDbRestClient {
      *
      * @param callback a Retrofit callback.
      */
-    public void moviesAsync(String sortType, String apiKey, Callback<MovieResult> callback) {
-        Call<MovieResult> moviesSync = apiService.getMoviesBySortType(sortType, apiKey);
+    public void moviesAsync(String sortType, Callback<MovieResult> callback) {
+        Call<MovieResult> moviesSync = apiService.getMoviesBySortType(sortType, API_KEY);
         moviesSync.enqueue(callback);
     }
 
@@ -78,9 +80,24 @@ public class TheMovieDbRestClient {
      *
      * @return
      */
-    public MovieResult moviesSync(String sortType, String apiKey) throws IOException {
-        Call<MovieResult> moviesSync = apiService.getMoviesBySortType(sortType, apiKey);
+    public MovieResult moviesSync(String sortType) throws IOException {
+        Call<MovieResult> moviesSync = apiService.getMoviesBySortType(sortType, API_KEY);
         return moviesSync.execute().body();
+    }
+
+    /**
+     * Get movies synchronously.
+     *
+     * @return
+     */
+    public Movie moviesSyncById(Long id) {
+        try{
+            Call<Movie> moviesSync = apiService.getMovieById(id, API_KEY);
+            return moviesSync.execute().body();
+        }catch (IOException e){
+
+        }
+        return null;
     }
 
     /**
@@ -88,8 +105,8 @@ public class TheMovieDbRestClient {
      *
      * @param callback a Retrofit callback.
      */
-    public void movieTrailersAsync(String id, String apiKey, Callback<TrailerResult> callback) {
-        Call<TrailerResult> movieTrailersSync = apiService.getMovieTrailers(id, apiKey);
+    public void movieTrailersAsync(String id, Callback<TrailerResult> callback) {
+        Call<TrailerResult> movieTrailersSync = apiService.getMovieTrailers(id, API_KEY);
         movieTrailersSync.enqueue(callback);
     }
 
@@ -98,8 +115,8 @@ public class TheMovieDbRestClient {
      *
      * @param callback a Retrofit callback.
      */
-    public void movieReviewsAsync(String id, String apiKey, Callback<ReviewResult> callback) {
-        Call<ReviewResult> movieReviewsSync = apiService.getMovieReviews(id, apiKey);
+    public void movieReviewsAsync(String id, Callback<ReviewResult> callback) {
+        Call<ReviewResult> movieReviewsSync = apiService.getMovieReviews(id, API_KEY);
         movieReviewsSync.enqueue(callback);
     }
 
@@ -108,8 +125,8 @@ public class TheMovieDbRestClient {
      *
      * @return
      */
-    public TrailerResult movieTrailersSync(String id, String apiKey) throws IOException {
-        Call<TrailerResult> moviesSync = apiService.getMovieTrailers(id, apiKey);
+    public TrailerResult movieTrailersSync(String id) throws IOException {
+        Call<TrailerResult> moviesSync = apiService.getMovieTrailers(id, API_KEY);
         return moviesSync.execute().body();
     }
 
@@ -118,8 +135,8 @@ public class TheMovieDbRestClient {
      *
      * @return
      */
-    public ReviewResult movieReviewsSync(String id, String apiKey) throws IOException {
-        Call<ReviewResult> moviesSync = apiService.getMovieReviews(id, apiKey);
+    public ReviewResult movieReviewsSync(String id) throws IOException {
+        Call<ReviewResult> moviesSync = apiService.getMovieReviews(id, API_KEY);
         return moviesSync.execute().body();
     }
 }

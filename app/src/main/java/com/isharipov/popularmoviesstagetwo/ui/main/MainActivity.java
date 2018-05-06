@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -20,8 +21,8 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.isharipov.popularmoviesstagetwo.BuildConfig;
 import com.isharipov.popularmoviesstagetwo.R;
+import com.isharipov.popularmoviesstagetwo.data.network.Movie;
 import com.isharipov.popularmoviesstagetwo.data.network.MovieResult;
 import com.isharipov.popularmoviesstagetwo.data.network.TheMovieDbRestClient;
 import com.isharipov.popularmoviesstagetwo.ui.detail.DetailActivity;
@@ -75,34 +76,51 @@ public class MainActivity extends AppCompatActivity {
         if (wifiConnected || mobileConnected) {
             offlineButton.setVisibility(View.INVISIBLE);
             progressBar.setVisibility(View.VISIBLE);
-            TheMovieDbRestClient.getInstance().moviesAsync(sortType, BuildConfig.THEMOVIE_DB_API_KEY, new Callback<MovieResult>() {
-                @Override
-                public void onResponse(@NonNull Call<MovieResult> call, @NonNull Response<MovieResult> response) {
-                    progressBar.setVisibility(View.INVISIBLE);
-                    if (response.isSuccessful()) {
-                        MovieResult result = response.body();
-                        if (result != null && result.getResults() != null) {
-                            gridView.setAdapter(new MovieAdapter(MainActivity.this, result.getResults(), new MovieClickListener()));
-                            movieResult = result;
+            if (sortType.equals("favorite")) {
+                new GetMoviesByIdAsyncTask(this, new GetMoviesByIdAsyncTaskListener() {
+                    @Override
+                    public void onPostExecute(MovieResult movieResult) {
+                        progressBar.setVisibility(View.INVISIBLE);
+                        gridView.setAdapter(new MovieAdapter(MainActivity.this, movieResult.getResults(), new MovieClickListener(movieResult.getResults().get(0))));
+                    }
+                }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            } else {
+                TheMovieDbRestClient.getInstance().moviesAsync(sortType, new Callback<MovieResult>() {
+                    @Override
+                    public void onResponse(@NonNull Call<MovieResult> call, @NonNull Response<MovieResult> response) {
+                        progressBar.setVisibility(View.INVISIBLE);
+                        if (response.isSuccessful()) {
+                            MovieResult result = response.body();
+                            if (result != null && result.getResults() != null) {
+                                gridView.setAdapter(new MovieAdapter(MainActivity.this, result.getResults(), new MovieClickListener(null)));
+                                movieResult = result;
+                            }
                         }
                     }
-                }
 
-                @Override
-                public void onFailure(@NonNull Call<MovieResult> call, @NonNull Throwable t) {
-                    progressBar.setVisibility(View.INVISIBLE);
-                    addButton();
-                }
-            });
+                    @Override
+                    public void onFailure(@NonNull Call<MovieResult> call, @NonNull Throwable t) {
+                        progressBar.setVisibility(View.INVISIBLE);
+                        addButton();
+                    }
+                });
+            }
         } else {
             addButton();
         }
     }
 
     class MovieClickListener implements MovieViewClickListener {
+        private final Movie movie;
+
+        MovieClickListener(Movie movie) {
+            this.movie = movie;
+        }
+
         @Override
         public void onClick(View view, int position) {
-            DetailActivity.start(MainActivity.this, movieResult.getResults().get(position));
+            DetailActivity.start(MainActivity.this, movie != null ? movie : movieResult.getResults().get(position));
+
         }
     }
 
