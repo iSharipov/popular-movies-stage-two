@@ -1,0 +1,1 @@
+Before work with application - add parameter THEMOVIE_DB_API_KEY with your API KEY to gradle.properties file
