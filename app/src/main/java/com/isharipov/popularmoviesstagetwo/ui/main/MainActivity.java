@@ -9,6 +9,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -48,8 +49,11 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView gridView;
     private String sortType;
     private MovieResult movieResult;
-
+    private Parcelable gridViewState;
+    private Bundle bundleRecyclerViewState;
+    private GridLayoutManager gridLayoutManager;
     private NetworkReceiver networkReceiver;
+    private static final String BUNDLE_RECYCLER_LAYOUT = "recycler_layout";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +61,24 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         initPreferences();
-        gridView.setLayoutManager(new GridLayoutManager(this, 2));
+        gridLayoutManager = new GridLayoutManager(this, 2);
+        gridView.setLayoutManager(gridLayoutManager);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(BUNDLE_RECYCLER_LAYOUT,
+                bundleRecyclerViewState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        if (savedInstanceState != null) {
+            bundleRecyclerViewState = savedInstanceState.getParcelable(BUNDLE_RECYCLER_LAYOUT);
+        }
     }
 
     public void updateConnectedFlags() {
@@ -158,6 +179,10 @@ public class MainActivity extends AppCompatActivity {
         } else {
             addButton();
         }
+        if (bundleRecyclerViewState != null) {
+            gridViewState = bundleRecyclerViewState.getParcelable(BUNDLE_RECYCLER_LAYOUT);
+            gridView.getLayoutManager().onRestoreInstanceState(gridViewState);
+        }
     }
 
     @Override
@@ -166,6 +191,10 @@ public class MainActivity extends AppCompatActivity {
         if (networkReceiver != null) {
             this.unregisterReceiver(networkReceiver);
         }
+        bundleRecyclerViewState = new Bundle();
+        gridViewState = gridView.getLayoutManager().onSaveInstanceState();
+        bundleRecyclerViewState.putParcelable(BUNDLE_RECYCLER_LAYOUT,
+                gridViewState);
         gridView.setAdapter(null);
     }
 
