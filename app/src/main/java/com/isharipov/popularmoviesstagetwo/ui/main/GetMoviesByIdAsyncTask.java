@@ -30,7 +30,6 @@ public class GetMoviesByIdAsyncTask extends AsyncTask<Void, Void, MovieResult> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        dataSource.open();
     }
 
     @Override
@@ -52,18 +51,15 @@ public class GetMoviesByIdAsyncTask extends AsyncTask<Void, Void, MovieResult> {
     protected void onPostExecute(MovieResult movieResult) {
         super.onPostExecute(movieResult);
         listener.onPostExecute(movieResult);
-        dataSource.close();
     }
 
     @Override
     protected void onCancelled(MovieResult movieResult) {
         super.onCancelled(movieResult);
-        dataSource.close();
     }
 
     @Override
     protected void onCancelled() {
         super.onCancelled();
-        dataSource.close();
     }
 }

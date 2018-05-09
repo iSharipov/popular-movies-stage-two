@@ -12,7 +12,6 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "favourites.db";
     private static final int DATABASE_VERSION = 1;
-
     // Database creation sql statement
     private static final String DATABASE_CREATE = "create table "
             + TABLE_FAVOURITES + "(" + COLUMN_ID

@@ -83,8 +83,7 @@ public class DetailActivity extends AppCompatActivity {
     }
 
     private void initDataSource() {
-        dataSource = new FavoriteDataSource(this);
-        dataSource.open();
+        dataSource = new FavoriteDataSource(getApplicationContext());
     }
 
     private void initTrailerView() {
@@ -174,18 +173,12 @@ public class DetailActivity extends AppCompatActivity {
     private void changeFavoriteButton() {
         Favorite favorite = dataSource.getFavorite(movie.getId());
         if (favorite != null) {
-            dataSource.deleteFavourite(favorite);
+            dataSource.deleteFavorite(favorite);
             favoriteButton.setImageResource(R.drawable.ic_bookmark_border_gray_24dp);
         } else {
             dataSource.createFavorite(movie.getId());
             favoriteButton.setImageResource(R.drawable.ic_bookmark_red_24dp);
         }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        dataSource.close();
     }
 
     class TrailerClickListener implements TrailerViewClickListener {
